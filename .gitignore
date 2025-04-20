@@ -1,0 +1,26 @@
+# Go build
+/bin/
+/vendor/
+
+# IDE / 编辑器
+.idea/
+.vscode/
+
+# macOS
+.DS_Store
+
+# 日志
+*.log
+
+# 配置文件（含密钥）
+configs/config.local.yaml
+# 环境配置文件（含密钥等）
+configs/config.*.yaml
+# 环境变量文件
+.env
+# Go 测试输出
+*.test
+*.out
+coverage.out
+# 测试数据目录
+testdata/
