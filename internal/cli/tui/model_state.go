@@ -47,8 +47,8 @@ type model struct {
 }
 
 // 初始化 Model
-func initialModel() model {
-	m := model{
+func initialModel() *model {
+	m := &model{
 		cursor:  0,
 		current: menuMain,
 	}

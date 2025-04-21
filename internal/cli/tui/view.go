@@ -6,40 +6,42 @@ import (
 	"strings"
 )
 
-// View 渲染函数
-func (m model) View() string {
-	var b strings.Builder
-
-	// —— 编辑流程视图 ——
+// View 分发入口
+func (m *model) View() string {
 	if m.current == menuConfig && m.editStage != stageNone {
-		// 选择要编辑的键名阶段
-		if m.editStage == stagePickKey {
-			b.WriteString(separator + "\n")
-			b.WriteString(headerStyle.Render("⚙️ 配置管理 > 选择键名") + "\n\n")
-			for i, key := range m.editKeys {
-				cursor := normalSymbol
-				if i == m.cursor {
-					cursor = cursorSymbol
-				}
-				b.WriteString(fmt.Sprintf("%s %s\n", cursor, key))
+		return m.viewEditFlow()
+	}
+	return m.viewMenu()
+}
+
+// viewEditFlow 渲染编辑流程
+func (m *model) viewEditFlow() string {
+	var b strings.Builder
+	b.WriteString(separator + "\n")
+
+	switch m.editStage {
+	case stagePickKey:
+		b.WriteString(headerStyle.Render("⚙️ 配置管理 > 选择键名") + "\n\n")
+		for i, key := range m.editKeys {
+			cursor := normalSymbol
+			if i == m.cursor {
+				cursor = cursorSymbol
 			}
-			return b.String()
+			b.WriteString(fmt.Sprintf("%s %s\n", cursor, key))
 		}
-		// 输入新值阶段
-		if m.editStage == stageEnterValue {
-			b.WriteString(separator + "\n")
-			b.WriteString(headerStyle.Render(fmt.Sprintf("⚙️ 配置管理 > 修改 %s", m.editKey)) + "\n\n")
-			// 文本输入框内容
-			b.WriteString(m.textInput.View() + "\n\n")
-			b.WriteString(footerHintStyle.Render("Enter 提交，Esc 取消") + "\n")
-			if m.statusMsg != "" {
-				b.WriteString("\n" + m.statusMsg + "\n")
-			}
-			return b.String()
-		}
+	case stageEnterValue:
+		b.WriteString(headerStyle.Render(fmt.Sprintf("⚙️ 配置管理 > 修改 %s", m.editKey)) + "\n\n")
+		b.WriteString(m.textInput.View() + "\n\n")
+		b.WriteString(footerHintStyle.Render("Enter 提交，Esc 取消") + "\n")
 	}
 
-	// —— 常规菜单视图 ——
+	b.WriteString(m.renderStatus())
+	return b.String()
+}
+
+// viewMenu 渲染常规菜单
+func (m *model) viewMenu() string {
+	var b strings.Builder
 	b.WriteString(separator + "\n")
 	b.WriteString(headerStyle.Render("🚀 飞书多维表格 CLI 工具 v0.1.0") + "\n")
 	b.WriteString(subHeaderStyle.Render(fmt.Sprintf("📂 当前表格：%s", displayOr(m.selectedBitable, "未选择"))) + "\n")
@@ -48,7 +50,19 @@ func (m model) View() string {
 	b.WriteString(separator + "\n")
 	b.WriteString(footerHintStyle.Render("↑↓ 选择，Enter 确认，q 退出") + "\n\n")
 
-	// 渲染当前层级的选项列表
+	b.WriteString(m.renderOptions())
+
+	if m.current == menuConfig && m.cursor == 0 {
+		b.WriteString(m.renderConfigData())
+	}
+	b.WriteString(m.renderStatus())
+
+	return b.String()
+}
+
+// renderOptions 渲染选项列表
+func (m *model) renderOptions() string {
+	var b strings.Builder
 	opts := m.currentOptions()
 	for i, opt := range opts {
 		prefix := normalSymbol
@@ -59,24 +73,29 @@ func (m model) View() string {
 		}
 		b.WriteString(fmt.Sprintf("%s %s\n", prefix, style.Render(opt)))
 	}
-
-	// 在“配置管理”菜单下，如果选中“查看当前配置”，则在下方打印所有配置
-	if m.current == menuConfig && m.cursor == 0 && m.editStage == stageNone {
-		b.WriteString("\n当前配置：\n")
-		for k, v := range m.configData {
-			b.WriteString(fmt.Sprintf(" • %s: %v\n", k, v))
-		}
-	}
-	// 如有状态提示（如保存成功、刷新成功），也一并展示
-	if m.statusMsg != "" {
-		b.WriteString("\n" + m.statusMsg + "\n")
-	}
-
 	return b.String()
 }
 
-// currentPath 根据 m.current 返回路径字符串
-func (m model) currentPath() string {
+// renderConfigData 渲染配置项
+func (m *model) renderConfigData() string {
+	var b strings.Builder
+	b.WriteString("\n当前配置：\n")
+	for k, v := range m.configData {
+		b.WriteString(fmt.Sprintf(" • %s: %v\n", k, v))
+	}
+	return b.String()
+}
+
+// renderStatus 渲染底部提示状态
+func (m *model) renderStatus() string {
+	if m.statusMsg != "" {
+		return "\n" + m.statusMsg + "\n"
+	}
+	return ""
+}
+
+// currentPath 返回路径字符串
+func (m *model) currentPath() string {
 	switch m.current {
 	case menuMain:
 		return "主菜单"
@@ -95,8 +114,8 @@ func (m model) currentPath() string {
 	}
 }
 
-// currentOptions 根据 m.current 返回菜单选项列表
-func (m model) currentOptions() []string {
+// currentOptions 返回菜单选项列表
+func (m *model) currentOptions() []string {
 	switch m.current {
 	case menuMain:
 		return []string{"🗂 多维表格管理", "🗄 数据表管理", "🧱 字段管理", "📝 记录管理", "⚙️ 配置管理", "🚪 退出"}
@@ -109,18 +128,12 @@ func (m model) currentOptions() []string {
 	case menuRecord:
 		return []string{"插入 Mock 数据（TODO）", "查看所有记录（TODO）", "⬅️ 返回主菜单"}
 	case menuConfig:
-		return []string{
-			"查看当前配置",
-			"修改配置项",
-			"刷新配置项",
-			"重置为默认配置",
-			"⬅️ 返回主菜单",
-		}
+		return []string{"查看当前配置", "修改配置项", "刷新配置项", "重置为默认配置", "⬅️ 返回主菜单"}
 	default:
 		return []string{}
 	}
 }
 
-func (m model) optionCount() int {
+func (m *model) optionCount() int {
 	return len(m.currentOptions())
 }
