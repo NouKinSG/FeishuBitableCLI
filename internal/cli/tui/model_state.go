@@ -21,9 +21,10 @@ const (
 type editStage int
 
 const (
-	stageNone       editStage = iota
-	stagePickKey              // 先让用户用↑↓选择要编辑的配置键
-	stageEnterValue           // 再让用户在文本框里输入新值
+	stageNone             editStage = iota
+	stagePickKey                    // 先让用户用↑↓选择要编辑的配置键
+	stageEnterValue                 // 再让用户在文本框里输入新值
+	stageEnterBitableName           // 新增：多维表格——输入名称
 )
 
 // 模型状态

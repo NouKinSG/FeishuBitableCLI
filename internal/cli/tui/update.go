@@ -24,7 +24,13 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // handleCustomMsg 处理特殊消息（启动编辑或刷新）
 func (m *model) handleCustomMsg(msg tea.Msg) tea.Cmd {
-	switch msg.(type) {
+
+	switch msg := msg.(type) {
+	// —— 新增：接收“创建多维表格”完成消息 ——
+	case startCreateBitableMsg:
+		m.handleCreateBitableMsg(msg)
+		return nil
+		// —— 原有配置管理消息 ——
 	case startEditConfigMsg:
 		m.prepareEdit(false)
 		return nil
@@ -77,6 +83,8 @@ func (m *model) handleEnter() (tea.Model, tea.Cmd) {
 	switch m.current {
 	case menuMain:
 		return m.enterMain()
+	case menuBitable:
+		return m.enterBitable()
 	case menuConfig:
 		return m.enterConfig()
 	default:
@@ -129,6 +137,27 @@ func (m *model) enterConfig() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// enterBitable 多维表格子菜单行为
+func (m *model) enterBitable() (tea.Model, tea.Cmd) {
+	switch m.cursor {
+	case 0:
+		m.statusMsg = "🔍 功能待实现：查看已有多维表格"
+	case 1:
+		// 进入“输入名称”状态
+		m.editStage = stageEnterBitableName
+		m.textInput.Placeholder = "请输入表格名称"
+		m.textInput.SetValue("")
+		m.textInput.Focus()
+	case 2:
+		m.statusMsg = "🗑️ 功能待实现：删除多维表格"
+	case 3:
+		m.current = menuMain
+		m.statusMsg = ""
+	}
+	m.cursor = 0
+	return m, nil
+}
+
 // updateEditing 编辑流程：选键或输入新值
 func (m *model) updateEditing(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.editStage {
@@ -136,6 +165,8 @@ func (m *model) updateEditing(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handlePickKey(msg)
 	case stageEnterValue:
 		return m.handleEnterValue(msg)
+	case stageEnterBitableName:
+		return m.handleEnterBitableName(msg)
 	default:
 		return m, nil
 	}
@@ -193,6 +224,29 @@ func (m *model) handleEnterValue(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.current = menuConfig
 		m.cursor = 0
 	}
+	return m, cmd
+}
+
+// handleEnterBitableName 负责“多维表格名称输入”流程
+func (m *model) handleEnterBitableName(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	// 文本框更新
+	m.textInput, cmd = m.textInput.Update(msg)
+
+	// Esc——取消
+	if key, ok := msg.(tea.KeyMsg); ok && key.String() == "esc" {
+		m.editStage = stageNone
+		m.current = menuBitable
+		m.cursor = 1 // “创建” 那一项
+		return m, nil
+	}
+
+	// Enter——发起创建
+	if key, ok := msg.(tea.KeyMsg); ok && key.String() == "enter" {
+		name := m.textInput.Value()
+		return m, createBitableCmd(name, "")
+	}
+
 	return m, cmd
 }
 
