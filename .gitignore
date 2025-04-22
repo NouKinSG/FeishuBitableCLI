@@ -24,3 +24,7 @@ configs/config.*.yaml
 coverage.out
 # 测试数据目录
 testdata/
+
+# 本地脚本
+pkg/script
+pkg/script/

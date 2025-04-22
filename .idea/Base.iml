@@ -4,6 +4,8 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/configs" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/script" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/script/dataTable/new" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
