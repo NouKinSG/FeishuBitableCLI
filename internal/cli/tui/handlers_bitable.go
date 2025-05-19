@@ -1,8 +1,8 @@
 package tui
 
 import (
-	"Base/internal/bitable"
 	"fmt"
+	"github.com/NouKinSG/FeishuBitableCLI/internal/bitable"
 	tea "github.com/charmbracelet/bubbletea"
 	"strings"
 )

@@ -1,8 +1,8 @@
 package tui
 
 import (
-	"Base/internal/config"
 	"fmt"
+	"github.com/NouKinSG/FeishuBitableCLI/internal/config"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

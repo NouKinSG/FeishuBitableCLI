@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"Base/internal/utils"
+	"github.com/NouKinSG/FeishuBitableCLI/internal/utils"
 )
 
 type Config struct {

@@ -1,7 +1,7 @@
 package tui
 
 import (
-	"Base/internal/config"
+	"github.com/NouKinSG/FeishuBitableCLI/internal/config"
 	"github.com/charmbracelet/bubbles/textinput"
 )
 

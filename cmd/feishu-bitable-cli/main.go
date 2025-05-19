@@ -1,11 +1,11 @@
 package main
 
 import (
-	"Base/internal/cli/tui"
 	"fmt"
+	"github.com/NouKinSG/FeishuBitableCLI/internal/cli/tui"
 	"os"
 
-	"Base/internal/config"
+	"github.com/NouKinSG/FeishuBitableCLI/internal/config"
 )
 
 func main() {

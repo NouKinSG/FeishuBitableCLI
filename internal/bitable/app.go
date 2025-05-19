@@ -1,9 +1,9 @@
 package bitable
 
 import (
-	"Base/internal/config"
 	"context"
 	"fmt"
+	"github.com/NouKinSG/FeishuBitableCLI/internal/config"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
 	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
 	larkbitable "github.com/larksuite/oapi-sdk-go/v3/service/bitable/v1"
